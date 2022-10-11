@@ -78,6 +78,13 @@ impl Keypair {
         Ok(Keypair::from_parts_unsafe(secret, public))
     }
 
+    /// Serialize a keypair as a hex of secret key
+    pub fn to_hex(&self) -> String {
+        let mut bytes = self.secret.scalar().to_bytes();
+        bytes.reverse();
+        hex::encode(&bytes)
+    }
+
     /// Obtain the Mina address corresponding to the keypair's public key
     pub fn get_address(self) -> String {
         self.public.into_address()
@@ -124,6 +131,13 @@ mod tests {
 
         Keypair::from_hex("164244176fddb5d769b7de2027469d027ad428fadcc0c02396e6280142efb718")
             .expect("failed to decode keypair secret key");
+    }
+
+    #[test]
+    fn to_hex() {
+        let secret_hex = "164244176fddb5d769b7de2027469d027ad428fadcc0c02396e6280142efb718";
+        let keypair = Keypair::from_hex(secret_hex).expect("failed to decode keypair secret key");
+        assert_eq!(keypair.to_hex(), secret_hex);
     }
 
     #[test]
