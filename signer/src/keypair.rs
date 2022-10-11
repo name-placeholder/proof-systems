@@ -141,6 +141,13 @@ mod tests {
     }
 
     #[test]
+    fn to_hex() {
+        let secret_hex = "164244176fddb5d769b7de2027469d027ad428fadcc0c02396e6280142efb718";
+        let keypair = Keypair::from_hex(secret_hex).expect("failed to decode keypair secret key");
+        assert_eq!(keypair.to_hex(), secret_hex);
+    }
+
+    #[test]
     fn get_address() {
         macro_rules! assert_get_address_eq {
             ($sec_key_hex:expr, $target_address:expr) => {
