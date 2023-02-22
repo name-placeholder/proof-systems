@@ -1269,7 +1269,7 @@ pub mod caml {
     // CamlProverProveMetadata
     //
 
-    #[derive(ocaml::IntoValue, ocaml::FromValue, ocaml_gen::Struct)]
+    #[derive(Debug, ocaml::IntoValue, ocaml::FromValue, ocaml_gen::Struct)]
     pub struct CamlProverProveMetadata {
         pub request_received_t: ocaml::Float,
         pub finished_t: ocaml::Float,
@@ -1503,10 +1503,10 @@ pub mod caml {
     impl From<ProverProveMetadata> for CamlProverProveMetadata {
         fn from(v: ProverProveMetadata) -> Self {
             let conv_t = |i| (i as f64) / 1_000_000.0;
-            Self {
+            dbg!(Self {
                 request_received_t: conv_t(v.request_received_t),
                 finished_t: conv_t(v.finished_t),
-            }
+            })
         }
     }
 }
