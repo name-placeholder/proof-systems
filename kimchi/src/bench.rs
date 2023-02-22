@@ -85,7 +85,8 @@ impl BenchmarkCtx {
                 &[],
                 &self.index,
             )
-            .unwrap(),
+            .unwrap()
+            .0,
             public_input,
         )
     }

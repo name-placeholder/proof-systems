@@ -167,7 +167,7 @@ where
 
         let group_map = <G as CommitmentCurve>::Map::setup();
 
-        let proof = ProverProof::create_recursive::<EFqSponge, EFrSponge>(
+        let (proof, _) = ProverProof::create_recursive::<EFqSponge, EFrSponge>(
             &group_map,
             witness,
             &self.0.runtime_tables,

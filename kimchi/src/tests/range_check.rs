@@ -1207,7 +1207,7 @@ fn verify_range_check_valid_proof1() {
     // Generate proof
     let group_map = <Vesta as CommitmentCurve>::Map::setup();
     let public_input = witness[0][0..prover_index.cs.public].to_vec();
-    let proof =
+    let (proof, _) =
         ProverProof::create::<BaseSponge, ScalarSponge>(&group_map, witness, &[], &prover_index)
             .expect("failed to generate proof");
 

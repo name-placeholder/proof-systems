@@ -28,7 +28,7 @@ use crate::{
     plonk_sponge::FrSponge,
     proof::{
         LookupCommitments, LookupEvaluations, PointEvaluations, ProofEvaluations,
-        ProverCommitments, ProverProof, RecursionChallenge,
+        ProverCommitments, ProverProof, ProverProveMetadata, RecursionChallenge,
     },
     prover_index::ProverIndex,
 };
@@ -131,7 +131,7 @@ where
         witness: [Vec<G::ScalarField>; COLUMNS],
         runtime_tables: &[RuntimeTable<G::ScalarField>],
         index: &ProverIndex<G>,
-    ) -> Result<Self> {
+    ) -> Result<(Self, ProverProveMetadata)> {
         Self::create_recursive::<EFqSponge, EFrSponge>(
             groupmap,
             witness,
@@ -161,7 +161,8 @@ where
         index: &ProverIndex<G>,
         prev_challenges: Vec<RecursionChallenge<G>>,
         blinders: Option<[Option<PolyComm<G::ScalarField>>; COLUMNS]>,
-    ) -> Result<Self> {
+    ) -> Result<(Self, ProverProveMetadata)> {
+        let meta = ProverProveMetadata::default();
         // make sure that the SRS is not smaller than the domain size
         let d1_size = index.cs.domain.d1.size();
         if index.srs.max_degree() < d1_size {
@@ -1225,7 +1226,7 @@ where
                 runtime: lookup_context.runtime_table_comm.map(|x| x.commitment),
             });
 
-        Ok(Self {
+        let proof = Self {
             commitments: ProverCommitments {
                 w_comm: array::from_fn(|i| w_comm[i].commitment.clone()),
                 z_comm: z_comm.commitment,
@@ -1236,7 +1237,9 @@ where
             evals: chunked_evals,
             ft_eval1,
             prev_challenges,
-        })
+        };
+
+        Ok((proof, meta))
     }
 }
 
@@ -1260,6 +1263,16 @@ pub mod caml {
         pub ft_eval1: CamlF,
         pub public: Vec<CamlF>,
         pub prev_challenges: Vec<CamlRecursionChallenge<CamlG, CamlF>>, //Vec<(Vec<CamlF>, CamlPolyComm<CamlG>)>,
+    }
+
+    //
+    // CamlProverProveMetadata
+    //
+
+    #[derive(ocaml::IntoValue, ocaml::FromValue, ocaml_gen::Struct)]
+    pub struct CamlProverProveMetadata {
+        pub request_received_t: ocaml::Float,
+        pub finished_t: ocaml::Float,
     }
 
     //
@@ -1484,6 +1497,16 @@ pub mod caml {
             };
 
             (proof, caml_pp.public.into_iter().map(Into::into).collect())
+        }
+    }
+
+    impl From<ProverProveMetadata> for CamlProverProveMetadata {
+        fn from(v: ProverProveMetadata) -> Self {
+            let conv_t = |i| (i as f64) / 1_000_000.0;
+            Self {
+                request_received_t: conv_t(v.request_received_t),
+                finished_t: conv_t(v.finished_t),
+            }
         }
     }
 }

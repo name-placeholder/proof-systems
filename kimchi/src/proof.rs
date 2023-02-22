@@ -16,6 +16,7 @@ use poly_commitment::{
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use std::array;
+use std::time::{Duration, SystemTime};
 
 //~ spec:startcode
 /// Evaluations of a polynomial at 2 points
@@ -126,6 +127,35 @@ pub struct ProverProof<G: AffineCurve> {
 
     /// The challenges underlying the optional polynomials folded into the proof
     pub prev_challenges: Vec<RecursionChallenge<G>>,
+}
+
+/// Metadata after proof is created.
+///
+/// Includes timings for different checkpoints.
+/// Times are in milliseconds.
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct ProverProveMetadata {
+    pub request_received_t: u64,
+    pub finished_t: u64,
+}
+
+impl ProverProveMetadata {
+    pub fn set_checkpoint<F>(&mut self, getter: F, time: SystemTime)
+    where
+        F: Fn(&mut ProverProveMetadata) -> &mut u64,
+    {
+        *getter(self) = time
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap_or(Duration::ZERO)
+            .as_micros() as u64;
+    }
+
+    pub fn set_checkpoint_now<F>(&mut self, getter: F)
+    where
+        F: Fn(&mut ProverProveMetadata) -> &mut u64,
+    {
+        self.set_checkpoint(getter, SystemTime::now())
+    }
 }
 
 /// A struct to store the challenges inside a `ProverProof`

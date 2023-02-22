@@ -68,7 +68,7 @@ mod tests {
 
         // add the proof to the batch
         let group_map = <Vesta as CommitmentCurve>::Map::setup();
-        let proof =
+        let (proof, _) =
             ProverProof::create::<BaseSponge, ScalarSponge>(&group_map, witness, &[], &index)
                 .unwrap();
 

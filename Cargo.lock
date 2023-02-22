@@ -986,8 +986,7 @@ dependencies = [
 [[package]]
 name = "ocaml-gen"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28dd9d697b36ebaab7c810ae59d8c6e522f431136b22b86fed46a79baae8003e"
+source = "git+https://github.com/openmina/ocaml-gen#24db12c4291e72c0ed99d3532f986e91863dcf41"
 dependencies = [
  "const-random",
  "ocaml",
@@ -998,8 +997,7 @@ dependencies = [
 [[package]]
 name = "ocaml-gen-derive"
 version = "0.1.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c46ef2be0733a7e51ce938e8330877bcf3f74c8be4d7d565136b314cb7039c37"
+source = "git+https://github.com/openmina/ocaml-gen#24db12c4291e72c0ed99d3532f986e91863dcf41"
 dependencies = [
  "convert_case",
  "proc-macro2 1.0.50",

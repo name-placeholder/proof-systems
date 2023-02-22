@@ -72,6 +72,7 @@ where
         Some(blinders),
     )
     .unwrap()
+    .0
 }
 
 /// Creates the prover index on input an `srs`, used `constants`, parameters for Poseidon, number of public inputs, and a specific circuit
