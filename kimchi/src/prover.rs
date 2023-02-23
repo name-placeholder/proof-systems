@@ -1271,8 +1271,8 @@ pub mod caml {
 
     #[derive(Debug, ocaml::IntoValue, ocaml::FromValue, ocaml_gen::Struct)]
     pub struct CamlProverProveMetadata {
-        pub request_received_t: ocaml::Float,
-        pub finished_t: ocaml::Float,
+        pub request_received_t: String,
+        pub finished_t: String,
     }
 
     //
@@ -1502,11 +1502,19 @@ pub mod caml {
 
     impl From<ProverProveMetadata> for CamlProverProveMetadata {
         fn from(v: ProverProveMetadata) -> Self {
-            let conv_t = |i| (i as f64) / 1_000_000.0;
-            dbg!(Self {
+            let id: u64 = rand::Rng::gen(&mut rand::rngs::OsRng::default());
+            let v_json = serde_json::to_string_pretty(&v).unwrap();
+
+            let conv_t = |i| ((i as f64) / 1_000_000.0).to_string();
+            let res = Self {
                 request_received_t: conv_t(v.request_received_t),
                 finished_t: conv_t(v.finished_t),
-            })
+            };
+
+            std::fs::write(format!("/home/dev/prover_meta{}", id), format!("{}\n\n{:?}",
+                v_json, res)).unwrap();
+            res
+
         }
     }
 }
