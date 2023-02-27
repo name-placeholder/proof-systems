@@ -29,7 +29,7 @@ pub fn bench_proof_creation(c: &mut Criterion) {
         |b| b.iter(|| black_box(ctx.create_proof())),
     );
 
-    for id in 1..=3 {
+    for id in 1..=4 {
         let prove = block_prover(id);
         group.bench_function(format!("block proof creation. id: {id}"), |b| {
             b.iter(|| black_box(prove()))
