@@ -129,14 +129,45 @@ pub struct ProverProof<G: AffineCurve> {
     pub prev_challenges: Vec<RecursionChallenge<G>>,
 }
 
+#[derive(Clone, Default, Serialize)]
+pub struct UseLookupMeta {
+    pub uses_lookup: bool,
+    pub uses_runtime_tables: bool,
+}
+
+impl From<(bool, bool)> for UseLookupMeta {
+    fn from(value: (bool, bool)) -> Self {
+        Self {
+            uses_lookup: value.0,
+            uses_runtime_tables: value.1,
+        }
+    }
+}
+
 /// Metadata after proof is created.
 ///
 /// Includes timings for different checkpoints.
 /// Times are in milliseconds.
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize)]
 pub struct ProverProveMetadata {
-    pub request_received_t: u64,
-    pub finished_t: u64,
+    pub request_received: u64,
+    pub create_recursive: u64,
+    pub pad_witness: u64,
+    pub set_up_fq_sponge: u64,
+    pub commit_to_witness_columns: u64,
+    pub use_lookup: (u64, UseLookupMeta),
+    pub z_permutation_aggregation_polynomial: u64,
+    pub eval_witness_polynomials_over_domains: u64,
+    pub compute_index_evals: u64,
+    pub compute_quotient_poly: u64,
+    pub lagrange_basis_eval_zeta_poly: u64,
+    pub lagrange_basis_eval_zeta_omega_poly: u64,
+    pub chunk_eval_zeta_omega_poly: u64,
+    pub compute_ft_poly: u64,
+    pub ft_eval_zeta_omega: u64,
+    pub build_polynomials: u64,
+    pub create_aggregated_evaluation_proof: u64,
+    pub finished: u64,
 }
 
 impl ProverProveMetadata {
