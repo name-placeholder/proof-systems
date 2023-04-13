@@ -56,16 +56,9 @@ impl Keypair {
         Self::from_parts_unsafe(scalar, public)
     }
 
-    /// Deserialize a keypair from secret key hex
-    ///
-    /// # Errors
-    ///
-    /// Will give error if `hex` string does not match certain requirements.
-    pub fn from_hex(secret_hex: &str) -> Result<Self> {
-        let mut bytes: Vec<u8> = hex::decode(secret_hex).map_err(|_| KeypairError::SecretKeyHex)?;
-        bytes.reverse(); // mina scalars hex format is in big-endian order
-
-        let secret = ScalarField::from_bytes(&bytes).map_err(|_| KeypairError::SecretKeyBytes)?;
+    /// Deserialize a keypair from secret key bytes
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+        let secret = ScalarField::from_bytes(bytes).map_err(|_| KeypairError::SecretKeyBytes)?;
         let public: CurvePoint = CurvePoint::prime_subgroup_generator()
             .mul(secret)
             .into_affine();
@@ -76,6 +69,17 @@ impl Keypair {
 
         // Safe now because we checked point is on the curve
         Ok(Keypair::from_parts_unsafe(secret, public))
+    }
+
+    /// Deserialize a keypair from secret key hex
+    ///
+    /// # Errors
+    ///
+    /// Will give error if `hex` string does not match certain requirements.
+    pub fn from_hex(secret_hex: &str) -> Result<Self> {
+        let mut bytes: Vec<u8> = hex::decode(secret_hex).map_err(|_| KeypairError::SecretKeyHex)?;
+        bytes.reverse(); // mina scalars hex format is in big-endian order
+        Self::from_bytes(&bytes)
     }
 
     /// Serialize a keypair as a hex of secret key
