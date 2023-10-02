@@ -459,7 +459,7 @@ impl<Field: PrimeField> SnarkyConstraintSystem<Field> {
             Field::zero(),
         ];
         let mut public_gates = Vec::new();
-        for row in 0..(public_input_size - 1) {
+        for row in 0..public_input_size {
             let public_var = V::External(row + 1);
             self.wire_(public_var, Row::PublicInput(row), 0);
             public_gates.push(GateSpec {
