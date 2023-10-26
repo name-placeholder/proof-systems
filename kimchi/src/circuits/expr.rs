@@ -453,7 +453,8 @@ pub enum FeatureFlag {
 
 impl FeatureFlag {
     fn is_enabled(&self) -> bool {
-        todo!("Handle features")
+        true
+        // todo!("Handle features")
     }
 }
 
