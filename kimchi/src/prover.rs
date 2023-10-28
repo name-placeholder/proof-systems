@@ -178,7 +178,12 @@ where
         let (_, endo_r) = G::endos();
 
         // TODO: rng should be passed as arg
-        let rng = &mut rand::rngs::OsRng;
+        #[cfg(not(test))]
+        let mut rng = rand::rngs::OsRng;
+        #[cfg(test)]
+        let mut rng: rand::rngs::StdRng = rand::SeedableRng::seed_from_u64(0);
+
+        let rng = &mut rng;
 
         // Verify the circuit satisfiability by the computed witness (baring plookup constraints)
         // Catch mistakes before proof generation.
