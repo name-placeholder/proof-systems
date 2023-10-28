@@ -47,6 +47,7 @@ use poly_commitment::{
     },
     evaluation_proof::DensePolynomialOrEvaluations,
 };
+use rand_core::{CryptoRng, RngCore};
 use rayon::prelude::*;
 use std::array;
 use std::collections::HashMap;
@@ -146,6 +147,7 @@ where
             index,
             Vec::new(),
             None,
+            &mut rand::rngs::OsRng,
         )
     }
 
@@ -168,6 +170,7 @@ where
         index: &ProverIndex<G>,
         prev_challenges: Vec<RecursionChallenge<G>>,
         blinders: Option<[Option<PolyComm<G::ScalarField>>; COLUMNS]>,
+        rng: &mut (impl RngCore + CryptoRng),
     ) -> Result<Self> {
         // make sure that the SRS is not smaller than the domain size
         let d1_size = index.cs.domain.d1.size();
@@ -176,14 +179,6 @@ where
         }
 
         let (_, endo_r) = G::endos();
-
-        // TODO: rng should be passed as arg
-        #[cfg(not(test))]
-        let mut rng = rand::rngs::OsRng;
-        #[cfg(test)]
-        let mut rng: rand::rngs::StdRng = rand::SeedableRng::seed_from_u64(0);
-
-        let rng = &mut rng;
 
         // Verify the circuit satisfiability by the computed witness (baring plookup constraints)
         // Catch mistakes before proof generation.

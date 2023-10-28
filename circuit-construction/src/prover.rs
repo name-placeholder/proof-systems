@@ -13,6 +13,7 @@ use poly_commitment::{
     commitment::{CommitmentCurve, PolyComm},
     srs::{endos, SRS},
 };
+use rand_core::{CryptoRng, RngCore};
 use std::array;
 
 /// Given an index, a group map, custom blinders for the witness, a public input vector, and a circuit `main`, it creates a proof.
@@ -26,6 +27,7 @@ pub fn prove<G, H, EFqSponge, EFrSponge>(
     blinders: Option<[Option<G::ScalarField>; COLUMNS]>,
     public_input: &[G::ScalarField],
     mut main: H,
+    rng: &mut (impl RngCore + CryptoRng),
 ) -> ProverProof<G>
 where
     H: FnMut(&mut WitnessGenerator<G::ScalarField>, Vec<Var<G::ScalarField>>),
@@ -70,6 +72,7 @@ where
         index,
         vec![],
         Some(blinders),
+        rng,
     )
     .unwrap()
 }

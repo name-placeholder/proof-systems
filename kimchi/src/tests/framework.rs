@@ -181,6 +181,7 @@ where
             &prover,
             self.0.recursion,
             None,
+            &mut rand::rngs::OsRng,
         )
         .map_err(|e| e.to_string())?;
         println!("- time to create proof: {:?}s", start.elapsed().as_secs());

@@ -95,6 +95,7 @@ fn test_example_circuit() {
         None,
         &public_input,
         |sys, p| circuit::<Fp, Pallas, _>(&proof_system_constants, Some(&witness), sys, p),
+        &mut rand::rngs::OsRng,
     );
 
     // verify proof
