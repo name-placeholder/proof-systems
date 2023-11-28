@@ -93,6 +93,11 @@ impl Keypair {
     pub fn get_address(self) -> String {
         self.public.into_address()
     }
+
+    /// Performs scalar multiplication with the secret key
+    pub fn secret_multiply_with_curve_point(&self, multiplicand: CurvePoint) -> CurvePoint {
+        multiplicand.mul(self.secret.clone().into_scalar()).into_affine()
+    }
 }
 
 impl fmt::Debug for Keypair {
