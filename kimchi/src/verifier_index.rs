@@ -160,7 +160,7 @@ where
     /// # Panics
     ///
     /// Will panic if `srs` cannot be in `cell`.
-    pub fn verifier_index(&self) -> VerifierIndex<G, OpeningProof>
+    pub fn verifier_index(&self) -> Arc<VerifierIndex<G, OpeningProof>>
     where
         VerifierIndex<G, OpeningProof>: Clone,
     {
@@ -205,7 +205,7 @@ where
         };
 
         // TODO: Switch to commit_evaluations for all index polys
-        VerifierIndex {
+        Arc::new(VerifierIndex {
             domain,
             max_poly_size: self.max_poly_size,
             zk_rows: self.cs.zk_rows,
@@ -310,7 +310,7 @@ where
             endo: self.cs.endo,
             lookup_index,
             linearization: self.linearization.clone(),
-        }
+        })
     }
 }
 
