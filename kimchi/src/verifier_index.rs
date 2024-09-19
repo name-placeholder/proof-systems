@@ -155,7 +155,7 @@ impl<G: KimchiCurve> ProverIndex<G> {
     /// # Panics
     ///
     /// Will panic if `srs` cannot be in `cell`.
-    pub fn verifier_index(&self) -> VerifierIndex<G> {
+    pub fn verifier_index(&self) -> Arc<VerifierIndex<G>> {
         if let Some(verifier_index) = &self.verifier_index {
             return verifier_index.clone();
         }
@@ -197,7 +197,7 @@ impl<G: KimchiCurve> ProverIndex<G> {
         };
 
         // TODO: Switch to commit_evaluations for all index polys
-        VerifierIndex {
+        Arc::new(VerifierIndex {
             domain,
             max_poly_size: self.max_poly_size,
             powers_of_alpha: self.powers_of_alpha.clone(),
@@ -299,7 +299,7 @@ impl<G: KimchiCurve> ProverIndex<G> {
             endo: self.cs.endo,
             lookup_index,
             linearization: self.linearization.clone(),
-        }
+        })
     }
 }
 

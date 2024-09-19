@@ -1,4 +1,4 @@
-use std::array;
+use std::{array, sync::Arc};
 
 use groupmap::{BWParameters, GroupMap};
 use mina_curves::pasta::{Fp, Vesta, VestaParameters};
@@ -29,7 +29,7 @@ pub struct BenchmarkCtx {
     num_gates: usize,
     group_map: BWParameters<VestaParameters>,
     index: ProverIndex<Vesta>,
-    verifier_index: VerifierIndex<Vesta>,
+    verifier_index: Arc<VerifierIndex<Vesta>>,
 }
 
 impl BenchmarkCtx {
