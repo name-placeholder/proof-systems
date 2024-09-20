@@ -193,6 +193,22 @@ impl<Evals> PointEvaluations<Evals> {
     }
 }
 
+impl<Evals: Copy> PointEvaluations<Evals> {
+    /// Mimic OCaml `point[0]`
+    ///
+    /// Short for `first`
+    pub fn fst(&self) -> Evals {
+        self.zeta
+    }
+
+    /// Mimic OCaml `point[1]`
+    ///
+    /// Shoft for `second`
+    pub fn snd(&self) -> Evals {
+        self.zeta_omega
+    }
+}
+
 impl<Eval> ProofEvaluations<Eval> {
     pub fn map<Eval2, FN: Fn(Eval) -> Eval2>(self, f: &FN) -> ProofEvaluations<Eval2> {
         let ProofEvaluations {
