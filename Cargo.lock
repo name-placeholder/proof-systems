@@ -1313,6 +1313,7 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "ark-test-curves",
+ "derivative",
  "rand",
 ]
 
