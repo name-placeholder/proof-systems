@@ -211,3 +211,18 @@ impl<FpC: FpConstants> FpBackend<9> for FpC {
         res
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::pasta::wasm_friendly::pasta::Fp9Parameters;
+
+    #[test]
+    fn test_mul_assign() {
+        let mut x = [1, 0, 0, 0, 0, 0, 0, 0, 0];
+        let y = [
+            134535, 9823489, 13487345, 2349086, 238975, 97234, 893642, 723401, 8923689,
+        ];
+        super::mul_assign::<Fp9Parameters>(&mut x, &y);
+        assert_ne!(x, [0; 9])
+    }
+}
