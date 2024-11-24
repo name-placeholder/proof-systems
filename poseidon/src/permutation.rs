@@ -7,20 +7,18 @@ use ark_ff::Field;
 fn apply_mds_matrix<F: Field, SC: SpongeConstants>(
     params: &ArithmeticSpongeParams<F>,
     state: &[F],
-) -> Vec<F> {
+) -> [F; 3] {
+    assert_eq!(params.mds.len(), 3);
     if SC::PERM_FULL_MDS {
-        params
-            .mds
-            .iter()
-            .map(|m| {
-                state
-                    .iter()
-                    .zip(m.iter())
-                    .fold(F::zero(), |x, (s, &m)| m * s + x)
-            })
-            .collect()
+        let mut new_state = [F::zero(); 3];
+        for (i, sub_params) in params.mds.iter().enumerate() {
+            for (state, param) in state.iter().zip(sub_params) {
+                new_state[i].add_assign(*param * state);
+            }
+        }
+        new_state
     } else {
-        vec![
+        [
             state[0] + state[2],
             state[0] + state[1],
             state[1] + state[2],
@@ -36,7 +34,9 @@ pub fn full_round<F: Field, SC: SpongeConstants>(
     for state_i in state.iter_mut() {
         *state_i = sbox::<F, SC>(*state_i);
     }
-    *state = apply_mds_matrix::<F, SC>(params, state);
+    let new_state = apply_mds_matrix::<F, SC>(params, state);
+    state.clear();
+    state.extend(new_state);
     for (i, x) in params.round_constants[r].iter().enumerate() {
         state[i].add_assign(x);
     }
