@@ -11,7 +11,7 @@ use crate::{
     },
     curve::KimchiCurve,
 };
-use ark_ff::{BitIteratorLE, Field, PrimeField};
+use ark_ff::{BitIteratorLE, BigInteger, Field, PrimeField};
 use std::array;
 use std::marker::PhantomData;
 
@@ -228,7 +228,7 @@ pub fn gen_witness<F: PrimeField + std::fmt::Display>(
     let bits_per_row = 2 * crumbs_per_row;
     assert_eq!(num_bits % bits_per_row, 0);
 
-    let bits_lsb: Vec<_> = BitIteratorLE::new(scalar.into_repr())
+    let bits_lsb: Vec<_> = BitIteratorLE::new(scalar.into_repr().to_64x4())
         .take(num_bits)
         .collect();
     let bits_msb: Vec<_> = bits_lsb.iter().rev().collect();
