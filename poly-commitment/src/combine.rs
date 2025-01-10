@@ -19,7 +19,7 @@ use ark_ec::{
     models::short_weierstrass_jacobian::GroupAffine as SWJAffine, AffineCurve, ProjectiveCurve,
     SWModelParameters,
 };
-use ark_ff::{BitIteratorBE, BigInteger, Field, One, PrimeField, Zero};
+use ark_ff::{BigInteger, BitIteratorBE, Field, One, PrimeField, Zero};
 use itertools::Itertools;
 use mina_poseidon::sponge::ScalarChallenge;
 use rayon::prelude::*;

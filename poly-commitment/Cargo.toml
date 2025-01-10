@@ -34,10 +34,13 @@ mina-poseidon = { path = "../poseidon", version = "0.1.0" }
 ocaml = { version = "0.22.2", optional = true }
 ocaml-gen = { version = "0.1.5", optional = true }
 
+smallvec = { git = "https://github.com/servo/rust-smallvec.git", features = ["std"] }
+# crossbeam-channel = "0.5"
+
 [dev-dependencies]
 colored = "2.0.0"
 rand_chacha = { version = "0.3.0" }
-ark-bn254 = { version = "0.3.0" }
+# ark-bn254 = { version = "0.3.0" }
 
 [features]
 ocaml_types = [ "ocaml", "ocaml-gen" ]

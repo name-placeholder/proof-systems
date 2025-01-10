@@ -1,6 +1,7 @@
+use crate::msm::call_msm;
 use crate::{commitment::*, srs::endos};
 use crate::{srs::SRS, PolynomialsToCombine, SRS as _};
-use ark_ec::{msm::VariableBaseMSM, AffineCurve, ProjectiveCurve};
+use ark_ec::{AffineCurve, ProjectiveCurve};
 use ark_ff::{FftField, Field, One, PrimeField, UniformRand, Zero};
 use ark_poly::{univariate::DensePolynomial, UVPolynomial};
 use ark_poly::{EvaluationDomain, Evaluations};
@@ -224,7 +225,7 @@ impl<G: CommitmentCurve> SRS<G> {
             let rand_l = <G::ScalarField as UniformRand>::rand(rng);
             let rand_r = <G::ScalarField as UniformRand>::rand(rng);
 
-            let l = VariableBaseMSM::multi_scalar_mul(
+            let l = call_msm(
                 &[&g[0..n], &[self.h, u]].concat(),
                 &[&a[n..], &[rand_l, inner_prod(a_hi, b_lo)]]
                     .concat()
@@ -234,7 +235,7 @@ impl<G: CommitmentCurve> SRS<G> {
             )
             .into_affine();
 
-            let r = VariableBaseMSM::multi_scalar_mul(
+            let r = call_msm(
                 &[&g[n..], &[self.h, u]].concat(),
                 &[&a[0..n], &[rand_r, inner_prod(a_lo, b_hi)]]
                     .concat()

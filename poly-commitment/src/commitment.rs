@@ -6,12 +6,13 @@
 //!     producing the batched opening proof
 //! 3. Verify batch of batched opening proofs
 
+use crate::msm::call_msm;
 use crate::srs::endos;
 use crate::SRS as SRSTrait;
 use crate::{error::CommitmentError, srs::SRS};
 use ark_ec::{
-    models::short_weierstrass_jacobian::GroupAffine as SWJAffine, msm::VariableBaseMSM,
-    AffineCurve, ProjectiveCurve, SWModelParameters,
+    models::short_weierstrass_jacobian::GroupAffine as SWJAffine, AffineCurve, ProjectiveCurve,
+    SWModelParameters,
 };
 use ark_ff::{
     BigInteger, Field, FpParameters, One, PrimeField, SquareRootField, UniformRand, Zero,
@@ -189,7 +190,7 @@ impl<'a, 'b, C: AffineCurve> Sub<&'a PolyComm<C>> for &'b PolyComm<C> {
     }
 }
 
-impl<C: AffineCurve> PolyComm<C> {
+impl<C: CommitmentCurve> PolyComm<C> {
     pub fn scale(&self, c: C::ScalarField) -> PolyComm<C> {
         PolyComm {
             elems: self.elems.iter().map(|g| g.mul(c).into_affine()).collect(),
@@ -222,7 +223,7 @@ impl<C: AffineCurve> PolyComm<C> {
                 .filter_map(|(com, scalar)| com.elems.get(chunk).map(|c| (c, scalar)))
                 .unzip();
 
-            let chunk_msm = VariableBaseMSM::multi_scalar_mul::<C>(&points, &scalars);
+            let chunk_msm = call_msm::<C>(&points, &scalars);
             elems.push(chunk_msm.into_affine());
         }
 
@@ -589,7 +590,7 @@ impl<G: CommitmentCurve> SRSTrait<G> for SRS<G> {
             elems.push(G::zero());
         } else {
             coeffs.chunks(self.g.len()).for_each(|coeffs_chunk| {
-                let chunk = VariableBaseMSM::multi_scalar_mul(&self.g, coeffs_chunk);
+                let chunk = call_msm::<G>(&self.g, coeffs_chunk);
                 elems.push(chunk.into_affine());
             });
         }
@@ -808,7 +809,7 @@ impl<G: CommitmentCurve> SRS<G> {
 
         // verify the equation
         let scalars: Vec<_> = scalars.iter().map(|x| x.into_repr()).collect();
-        VariableBaseMSM::multi_scalar_mul(&points, &scalars) == G::Projective::zero()
+        call_msm(&points, &scalars) == G::Projective::zero()
     }
 }
 
