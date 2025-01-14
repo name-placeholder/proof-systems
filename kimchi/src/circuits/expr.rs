@@ -1021,24 +1021,24 @@ fn unnormalized_lagrange_evals<F: FftField>(
 
 impl<'a, F: FftField> EvalResult<'a, F> {
     fn init_<G: Sync + Send + Fn(usize) -> F>(
-        res_domain: (Domain, D<F>),
+        res_domain: (Domain, &D<F>),
         g: G,
     ) -> Evaluations<F, D<F>> {
         let n = res_domain.1.size();
         Evaluations::<F, D<F>>::from_vec_and_domain(
             (0..n).into_par_iter().map(g).collect(),
-            res_domain.1,
+            res_domain.1.clone(),
         )
     }
 
-    fn init<G: Sync + Send + Fn(usize) -> F>(res_domain: (Domain, D<F>), g: G) -> Self {
+    fn init<G: Sync + Send + Fn(usize) -> F>(res_domain: (Domain, &D<F>), g: G) -> Self {
         Self::Evals {
             domain: res_domain.0,
             evals: Self::init_(res_domain, g),
         }
     }
 
-    fn add<'c>(self, other: EvalResult<'_, F>, res_domain: (Domain, D<F>)) -> EvalResult<'c, F> {
+    fn add<'c>(self, other: EvalResult<'_, F>, res_domain: (Domain, &D<F>)) -> EvalResult<'c, F> {
         use EvalResult::*;
         match (self, other) {
             (Constant(x), Constant(y)) => Constant(x + y),
@@ -1074,7 +1074,7 @@ impl<'a, F: FftField> EvalResult<'a, F> {
                     .collect();
                 Evals {
                     domain: res_domain.0,
-                    evals: Evaluations::<F, D<F>>::from_vec_and_domain(v, res_domain.1),
+                    evals: Evaluations::<F, D<F>>::from_vec_and_domain(v, res_domain.1.clone()),
                 }
             }
             (
@@ -1151,13 +1151,13 @@ impl<'a, F: FftField> EvalResult<'a, F> {
 
                 Evals {
                     domain: res_domain.0,
-                    evals: Evaluations::<F, D<F>>::from_vec_and_domain(v, res_domain.1),
+                    evals: Evaluations::<F, D<F>>::from_vec_and_domain(v, res_domain.1.clone()),
                 }
             }
         }
     }
 
-    fn sub<'c>(self, other: EvalResult<'_, F>, res_domain: (Domain, D<F>)) -> EvalResult<'c, F> {
+    fn sub<'c>(self, other: EvalResult<'_, F>, res_domain: (Domain, &D<F>)) -> EvalResult<'c, F> {
         use EvalResult::*;
         match (self, other) {
             (Constant(x), Constant(y)) => Constant(x - y),
@@ -1275,7 +1275,7 @@ impl<'a, F: FftField> EvalResult<'a, F> {
         }
     }
 
-    fn pow<'b>(self, d: u64, res_domain: (Domain, D<F>)) -> EvalResult<'b, F> {
+    fn pow<'b>(self, d: u64, res_domain: (Domain, &D<F>)) -> EvalResult<'b, F> {
         let mut acc = EvalResult::Constant(F::one());
         for i in (0..u64::BITS).rev() {
             acc = acc.square(res_domain);
@@ -1288,7 +1288,7 @@ impl<'a, F: FftField> EvalResult<'a, F> {
         acc
     }
 
-    fn square<'b>(self, res_domain: (Domain, D<F>)) -> EvalResult<'b, F> {
+    fn square<'b>(self, res_domain: (Domain, &D<F>)) -> EvalResult<'b, F> {
         use EvalResult::*;
         match self {
             Constant(x) => Constant(x.square()),
@@ -1312,7 +1312,7 @@ impl<'a, F: FftField> EvalResult<'a, F> {
         }
     }
 
-    fn mul<'c>(self, other: EvalResult<'_, F>, res_domain: (Domain, D<F>)) -> EvalResult<'c, F> {
+    fn mul<'c>(self, other: EvalResult<'_, F>, res_domain: (Domain, &D<F>)) -> EvalResult<'c, F> {
         use EvalResult::*;
         match (self, other) {
             (Constant(x), Constant(y)) => Constant(x * y),
@@ -1421,6 +1421,15 @@ fn get_domain<F: FftField>(d: Domain, env: &Environment<F>) -> D<F> {
         Domain::D2 => env.domain.d2,
         Domain::D4 => env.domain.d4,
         Domain::D8 => env.domain.d8,
+    }
+}
+
+fn get_domain_ref<'a, F: FftField>(d: Domain, env: &'a Environment<F>) -> &'a D<F> {
+    match d {
+        Domain::D1 => &env.domain.d1,
+        Domain::D2 => &env.domain.d2,
+        Domain::D4 => &env.domain.d4,
+        Domain::D8 => &env.domain.d8,
     }
 }
 
@@ -1713,13 +1722,13 @@ impl<F: FftField> Expr<F> {
                 assert_eq!(domain, d);
                 evals
             }
-            EvalResult::Constant(x) => EvalResult::init_((d, get_domain(d, env)), |_| x),
+            EvalResult::Constant(x) => EvalResult::init_((d, get_domain_ref(d, env)), |_| x),
             EvalResult::SubEvals {
                 evals,
                 domain: d_sub,
                 shift: s,
             } => {
-                let res_domain = get_domain(d, env);
+                let res_domain = get_domain_ref(d, env);
                 let scale = (d_sub as usize) / (d as usize);
                 assert!(scale != 0);
                 EvalResult::init_((d, res_domain), |i| {
@@ -1738,7 +1747,7 @@ impl<F: FftField> Expr<F> {
     where
         'a: 'b,
     {
-        let dom = (d, get_domain(d, env));
+        let dom = (d, get_domain_ref(d, env));
 
         let res: EvalResult<'a, F> = match self {
             Expr::Square(x) => match x.evaluations_helper(cache, d, env) {
@@ -1800,10 +1809,11 @@ impl<F: FftField> Expr<F> {
             Expr::Pow(x, p) => {
                 let x = x.evaluations_helper(cache, d, env);
                 match x {
-                    Either::Left(x) => x.pow(*p, (d, get_domain(d, env))),
-                    Either::Right(id) => {
-                        id.get_from(cache).unwrap().pow(*p, (d, get_domain(d, env)))
-                    }
+                    Either::Left(x) => x.pow(*p, (d, get_domain_ref(d, env))),
+                    Either::Right(id) => id
+                        .get_from(cache)
+                        .unwrap()
+                        .pow(*p, (d, get_domain_ref(d, env))),
                 }
             }
             Expr::VanishesOnZeroKnowledgeAndPreviousRows => EvalResult::SubEvals {
@@ -1837,7 +1847,7 @@ impl<F: FftField> Expr<F> {
                 }
             }
             Expr::BinOp(op, e1, e2) => {
-                let dom = (d, get_domain(d, env));
+                let dom = (d, get_domain_ref(d, env));
                 let f = |x: EvalResult<F>, y: EvalResult<F>| match op {
                     Op2::Mul => x.mul(y, dom),
                     Op2::Add => x.add(y, dom),

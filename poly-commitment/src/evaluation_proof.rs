@@ -225,25 +225,31 @@ impl<G: CommitmentCurve> SRS<G> {
             let rand_l = <G::ScalarField as UniformRand>::rand(rng);
             let rand_r = <G::ScalarField as UniformRand>::rand(rng);
 
-            let l = call_msm(
-                &[&g[0..n], &[self.h, u]].concat(),
-                &[&a[n..], &[rand_l, inner_prod(a_hi, b_lo)]]
-                    .concat()
-                    .iter()
-                    .map(|x| x.into_repr())
-                    .collect::<Vec<_>>(),
-            )
-            .into_affine();
+            let call_l = || {
+                call_msm(
+                    &[&g[0..n], &[self.h, u]].concat(),
+                    &[&a[n..], &[rand_l, inner_prod(a_hi, b_lo)]]
+                        .concat()
+                        .iter()
+                        .map(|x| x.into_repr())
+                        .collect::<Vec<_>>(),
+                )
+                .into_affine()
+            };
 
-            let r = call_msm(
-                &[&g[n..], &[self.h, u]].concat(),
-                &[&a[0..n], &[rand_r, inner_prod(a_lo, b_hi)]]
-                    .concat()
-                    .iter()
-                    .map(|x| x.into_repr())
-                    .collect::<Vec<_>>(),
-            )
-            .into_affine();
+            let call_r = || {
+                call_msm(
+                    &[&g[n..], &[self.h, u]].concat(),
+                    &[&a[0..n], &[rand_r, inner_prod(a_lo, b_hi)]]
+                        .concat()
+                        .iter()
+                        .map(|x| x.into_repr())
+                        .collect::<Vec<_>>(),
+                )
+                .into_affine()
+            };
+
+            let (l, r) = rayon::join(call_l, call_r);
 
             lr.push((l, r));
             blinders.push((rand_l, rand_r));
@@ -258,29 +264,33 @@ impl<G: CommitmentCurve> SRS<G> {
             chals.push(u);
             chal_invs.push(u_inv);
 
-            a = a_hi
-                .par_iter()
-                .zip(a_lo)
-                .map(|(&hi, &lo)| {
-                    // lo + u_inv * hi
-                    let mut res = hi;
-                    res *= u_inv;
-                    res += &lo;
-                    res
-                })
-                .collect();
+            let call_a = || {
+                a_hi.par_iter()
+                    .zip(a_lo)
+                    .map(|(&hi, &lo)| {
+                        // lo + u_inv * hi
+                        let mut res = hi;
+                        res *= u_inv;
+                        res += &lo;
+                        res
+                    })
+                    .collect()
+            };
 
-            b = b_lo
-                .par_iter()
-                .zip(b_hi)
-                .map(|(&lo, &hi)| {
-                    // lo + u * hi
-                    let mut res = hi;
-                    res *= u;
-                    res += &lo;
-                    res
-                })
-                .collect();
+            let call_b = || {
+                b_lo.par_iter()
+                    .zip(b_hi)
+                    .map(|(&lo, &hi)| {
+                        // lo + u * hi
+                        let mut res = hi;
+                        res *= u;
+                        res += &lo;
+                        res
+                    })
+                    .collect()
+            };
+
+            (a, b) = rayon::join(call_a, call_b);
 
             g = G::combine_one_endo(endo_r, endo_q, &g_lo, &g_hi, u_pre);
         }

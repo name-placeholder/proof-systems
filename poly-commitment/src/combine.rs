@@ -295,7 +295,7 @@ fn affine_window_combine_one_endo_base<P: SWModelParameters>(
 ) -> Vec<SWJAffine<P>> {
     fn assign<A: Copy>(dst: &mut [A], src: &[A]) {
         let n = dst.len();
-        dst[..n].clone_from_slice(&src[..n]);
+        dst[..n].copy_from_slice(&src[..n]);
     }
 
     fn get_bit(limbs_lsb: &[u64], i: u64) -> u64 {

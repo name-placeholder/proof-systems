@@ -123,10 +123,9 @@ pub fn call_msm_impl<G: CommitmentCurve>(
     // Safety: We're reinterpreting generic types to their concret types
     // proof-systems contains too much useless generic types
     // It's safe because we just asserted they are the same types
-    let result = my_msm::<G::Params>(
-        unsafe { std::mem::transmute(points) },
-        unsafe { std::mem::transmute(scalars) },
-    );
+    let result = my_msm::<G::Params>(unsafe { std::mem::transmute(points) }, unsafe {
+        std::mem::transmute(scalars)
+    });
     unsafe { *(&result as *const _ as *const G::Projective) }
 }
 

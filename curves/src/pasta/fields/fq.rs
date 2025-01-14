@@ -1,7 +1,6 @@
-use ark_ff::{biginteger::BigInteger256 as BigInteger, FftParameters, Fp256Parameters, Fp256};
+use ark_ff::{biginteger::BigInteger256 as BigInteger, FftParameters, Fp256, Fp256Parameters};
 
 pub type Fq = Fp256<FqParameters>;
-
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub struct FqParameters;

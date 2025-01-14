@@ -1,4 +1,4 @@
-use ark_ff::{biginteger::BigInteger256 as BigInteger, FftParameters, Fp256Parameters, Fp256};
+use ark_ff::{biginteger::BigInteger256 as BigInteger, FftParameters, Fp256, Fp256Parameters};
 
 pub type Fp = Fp256<FpParameters>;
 
