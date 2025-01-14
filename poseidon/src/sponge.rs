@@ -19,7 +19,8 @@ pub fn endo_coefficient<F: PrimeField>() -> F {
 
     let t = F::multiplicative_generator();
 
-    t.pow(p_minus_1_over_3.into_repr().as_ref())
+    let p_minus_1_over_3 = p_minus_1_over_3.into_repr().to_64x4();
+    t.pow(&p_minus_1_over_3)
 }
 
 fn get_bit(limbs_lsb: &[u64], i: u64) -> u64 {
@@ -30,7 +31,7 @@ fn get_bit(limbs_lsb: &[u64], i: u64) -> u64 {
 
 impl<F: PrimeField> ScalarChallenge<F> {
     pub fn to_field_with_length(&self, length_in_bits: usize, endo_coeff: &F) -> F {
-        let rep = self.0.into_repr();
+        let rep = self.0.into_repr().to_64x4();
         let r = rep.as_ref();
 
         let mut a: F = 2_u64.into();
@@ -92,6 +93,7 @@ impl<Fr: PrimeField, SC: SpongeConstants> DefaultFrSponge<Fr, SC> {
                 .expect("internal representation was not a valid field element")
         } else {
             let x = self.sponge.squeeze().into_repr();
+            let x = x.to_64x4();
             self.last_squeezed
                 .extend(&x.as_ref()[0..HIGH_ENTROPY_LIMBS]);
             self.squeeze(num_limbs)
@@ -112,6 +114,7 @@ where
             limbs.to_vec()
         } else {
             let x = self.sponge.squeeze().into_repr();
+            let x = x.to_64x4();
             self.last_squeezed
                 .extend(&x.as_ref()[0..HIGH_ENTROPY_LIMBS]);
             self.squeeze_limbs(num_limbs)

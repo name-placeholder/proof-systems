@@ -19,7 +19,7 @@ use ark_ec::{
     models::short_weierstrass_jacobian::GroupAffine as SWJAffine, AffineCurve, ProjectiveCurve,
     SWModelParameters,
 };
-use ark_ff::{BitIteratorBE, Field, One, PrimeField, Zero};
+use ark_ff::{BigInteger, BitIteratorBE, Field, One, PrimeField, Zero};
 use itertools::Itertools;
 use mina_poseidon::sponge::ScalarChallenge;
 use rayon::prelude::*;
@@ -190,8 +190,8 @@ fn affine_window_combine_base<P: SWModelParameters>(
     };
     assert!(g1g2.len() == g1.len());
 
-    let windows1 = BitIteratorBE::new(x1.into_repr()).tuples();
-    let windows2 = BitIteratorBE::new(x2.into_repr()).tuples();
+    let windows1 = BitIteratorBE::new(x1.into_repr().to_64x4()).tuples();
+    let windows2 = BitIteratorBE::new(x2.into_repr().to_64x4()).tuples();
 
     let mut points = vec![SWJAffine::<P>::zero(); g1.len()];
 
@@ -295,7 +295,7 @@ fn affine_window_combine_one_endo_base<P: SWModelParameters>(
 ) -> Vec<SWJAffine<P>> {
     fn assign<A: Copy>(dst: &mut [A], src: &[A]) {
         let n = dst.len();
-        dst[..n].clone_from_slice(&src[..n]);
+        dst[..n].copy_from_slice(&src[..n]);
     }
 
     fn get_bit(limbs_lsb: &[u64], i: u64) -> u64 {
@@ -304,8 +304,11 @@ fn affine_window_combine_one_endo_base<P: SWModelParameters>(
         (limbs_lsb[limb as usize] >> j) & 1
     }
 
+    use ark_ff::BigInteger;
+
     let rep = chal.0.into_repr();
-    let r = rep.as_ref();
+    let r = rep.to_64x4();
+    let r = r.as_ref();
 
     let mut denominators = vec![P::BaseField::zero(); g1.len()];
     // acc = 2 (phi(g2) + g2)
@@ -371,7 +374,7 @@ fn affine_window_combine_one_base<P: SWModelParameters>(
     g2: &[SWJAffine<P>],
     x2: P::ScalarField,
 ) -> Vec<SWJAffine<P>> {
-    let windows2 = BitIteratorBE::new(x2.into_repr()).tuples();
+    let windows2 = BitIteratorBE::new(x2.into_repr().to_64x4()).tuples();
 
     let mut points = vec![SWJAffine::<P>::zero(); g1.len()];
 
@@ -594,8 +597,8 @@ fn window_shamir<G: AffineCurve>(
     let [_g00_00, g01_00, g10_00, g11_00, g00_01, g01_01, g10_01, g11_01, g00_10, g01_10, g10_10, g11_10, g00_11, g01_11, g10_11, g11_11] =
         shamir_window_table(g1, g2);
 
-    let windows1 = BitIteratorBE::new(x1.into_repr()).tuples();
-    let windows2 = BitIteratorBE::new(x2.into_repr()).tuples();
+    let windows1 = BitIteratorBE::new(x1.into_repr().to_64x4()).tuples();
+    let windows2 = BitIteratorBE::new(x2.into_repr().to_64x4()).tuples();
 
     let mut res = G::Projective::zero();
 
