@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["G_GENERATOR_X","G_GENERATOR_Y"],"struct":["LegacyPallasParameters","PallasParameters"],"type":["LegacyPallas","Pallas","ProjectivePallas"]};

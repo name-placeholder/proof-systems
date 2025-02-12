@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["LegendreSymbol"],"mod":["fft","fp","fq"],"trait":["SquareRootField"]};

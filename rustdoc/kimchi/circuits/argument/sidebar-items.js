@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ArgumentType"],"struct":["ArgumentData","ArgumentEnv","ArgumentWitness"],"trait":["Argument","DynArgument"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["NetworkId"],"fn":["create_kimchi","create_legacy"],"mod":["keypair","pubkey","schnorr","seckey","signature"],"trait":["Signer"],"type":["BaseField","CurvePoint","ScalarField"]};

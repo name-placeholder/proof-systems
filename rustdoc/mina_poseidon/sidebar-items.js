@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["constants","dummy_values","pasta","permutation","poseidon","sponge"]};

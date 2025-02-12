@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["ComposedMPrism","IdMPrism","SubEnvColumn","SubEnvLookup"],"trait":["MPrism"]};

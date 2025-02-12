@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_xor_witness","extend_xor_witness","lookup_table","num_xors"],"struct":["Xor16"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_and_witness","extend_and_witness","lookup_table"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["DummyLookupTable","LookupTableIDs"],"type":["Lookup","LookupWitness"]};

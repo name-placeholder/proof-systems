@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["create_kimchi","create_legacy"],"mod":["poseidon","roinput"],"trait":["DomainParameter","Hashable","Hasher"],"type":["Fp"]};

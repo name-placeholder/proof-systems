@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["CONSTRAINTS","DOUBLE_GENERIC_COEFFS","DOUBLE_GENERIC_REGISTERS","GENERIC_COEFFS","GENERIC_REGISTERS"],"enum":["GenericGateSpec"],"mod":["testing"],"struct":["Generic"]};
